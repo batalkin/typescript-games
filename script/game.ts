@@ -8,7 +8,8 @@ class RefrigeratorGame implements Game {
     ctx : CanvasRenderingContext2D;
     arr : number[][];
     pad : number = 8;
-    level: number = 2;
+    cellSize: number;
+    level: number = 3;
     size: number = 4;
 
 
@@ -25,10 +26,13 @@ class RefrigeratorGame implements Game {
 
     start() {
         this.canvas = document.createElement("canvas");
-        this.canvas.height = 250;
-        this.canvas.width = 250;
-        document.body.appendChild(this.canvas);
+        this.canvas.height = this.container.clientHeight;
+        this.canvas.width = this.container.clientWidth;
+        this.container.appendChild(this.canvas);
         this.ctx = this.canvas.getContext("2d");
+
+        this.cellSize = Math.floor(this.canvas.width / this.size);
+        this.pad = Math.round(this.cellSize*0.15);
 
         for (var i = 0; i < this.level; i++) {
             var x = Math.round(Math.random()*(this.size-1));
@@ -49,8 +53,8 @@ class RefrigeratorGame implements Game {
         var x = e.x  - this.canvas.getBoundingClientRect().left - this.pad;
         var y = e.y  - this.canvas.getBoundingClientRect().top -this.pad;
 
-        var j  = Math.floor(x / 60);
-        var i = Math.floor(y / 60);
+        var j  = Math.floor(x / this.cellSize);
+        var i = Math.floor(y / this.cellSize);
 
         i = Math.min(i, this.size-1);
         j = Math.min(j, this.size-1);
@@ -84,10 +88,10 @@ class RefrigeratorGame implements Game {
                 }
                 ctx.beginPath();
 
-                var pad_bottom=60-this.pad;
+                var pad_bottom=this.cellSize-2*this.pad;
 
-                var x = j * 60 + this.pad;
-                var y = k * 60 + this.pad;
+                var x = j * this.cellSize + this.pad;
+                var y = k * this.cellSize + this.pad;
 
                 if (line[j]) {
                     ctx.moveTo(x, y);
@@ -102,17 +106,11 @@ class RefrigeratorGame implements Game {
         }
     }
 
-    isDone() {
-        return this.arr.some(function(a) {
-            return a.some(function(e) {
-                return e === 1;
-            })
-        });
-    }
 
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    var game: Game  = new RefrigeratorGame(<HTMLElement>document.getElementsByClassName("container"));
+    var game: Game  = new RefrigeratorGame(<HTMLElement>document.getElementsByClassName("container")[0]);
+    game.level = 2;
     game.start();
 });
