@@ -64,7 +64,7 @@ class RefrigeratorGame implements Game {
 
     renderLevel() {
         var ctx: CanvasRenderingContext2D = this.ctx,
-            arr: Number[][]= this.arr;
+            arr: number[][]= this.arr;
 
         ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
 
