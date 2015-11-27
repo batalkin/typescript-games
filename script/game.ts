@@ -1,29 +1,35 @@
 interface Game {
-    renderLevel: () => void
     start: () => void
 }
 
 class RefrigeratorGame implements Game {
 
+    canvas: HTMLCanvasElement;
     ctx : CanvasRenderingContext2D;
     arr : number[][];
     pad : number = 8;
     level: number = 2;
+    size: number = 4;
 
-    constructor(public canvas: HTMLCanvasElement, public size: number) {
-        this.ctx = canvas.getContext("2d");
-        this.arr = new Array(size);
-        for (var i = 0; i< size; i++) {
-            this.arr[i] = new Array<number>(size);
-            for (var j = 0; j < size; j++) {
+
+    constructor(public container: HTMLElement) {
+        this.arr = new Array(this.size);
+        for (var i = 0; i< this.size; i++) {
+            this.arr[i] = new Array<number>(this.size);
+            for (var j = 0; j < this.size; j++) {
                 this.arr[i][j] = 0;
             }
         }
     }
 
 
-
     start() {
+        this.canvas = document.createElement("canvas");
+        this.canvas.height = 250;
+        this.canvas.width = 250;
+        document.body.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext("2d");
+
         for (var i = 0; i < this.level; i++) {
             var x = Math.round(Math.random()*(this.size-1));
             var y = Math.round(Math.random()*(this.size-1));
@@ -62,7 +68,7 @@ class RefrigeratorGame implements Game {
         this.renderLevel();
     }
 
-    renderLevel() {
+    private renderLevel() {
         var ctx: CanvasRenderingContext2D = this.ctx,
             arr: number[][]= this.arr;
 
@@ -107,7 +113,6 @@ class RefrigeratorGame implements Game {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    var game: Game  = new RefrigeratorGame(<HTMLCanvasElement>document.getElementById("game-canvas"),4);
-    game.renderLevel();
+    var game: Game  = new RefrigeratorGame(<HTMLElement>document.getElementsByClassName("container"));
     game.start();
 });
