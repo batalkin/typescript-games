@@ -50,5 +50,3 @@ crashlytics-build.properties
 scripts/*.js.map
 scripts/*.js
 
-typings/
-bower_components/
