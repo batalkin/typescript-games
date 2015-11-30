@@ -1,0 +1,23 @@
+{
+  "name": "typescript-games",
+  "homepage": "https://github.com/batalkin/typescript-games",
+  "authors": [
+    "Kirill Batalkin <batalkin@gmail.com>"
+  ],
+  "description": "",
+  "main": "index.html",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "threejs": "latest"
+  }
+}
