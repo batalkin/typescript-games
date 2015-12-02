@@ -1,4 +1,5 @@
 /// <reference path="../typings/threejs/three.d.ts"/>
+/// <reference path="../typings/threejs/three-orbitcontrols.d.ts"/>
 
 interface Game {
     start: () => void
@@ -297,64 +298,160 @@ class SnakeGame extends CanvasGame {
 
 class ThreeDimGame implements Game{
 
-    mesh: THREE.Mesh;
-    mesh2: THREE.Mesh;
+    meshes: THREE.Mesh[][];
     scene: THREE.Scene;
     renderer : THREE.WebGLRenderer;
     camera: THREE.PerspectiveCamera;
-
+    rotationSide:number = 1;
+    size: number = 4;
+    pad : number = 8;
+    cellSize: number = 40;
+    rotation: boolean = false;
+    i:number = 0;
+    j:number = 0;
+    p:number = 0;
 
     constructor(public container: HTMLElement) {}
 
     public start() {
-        var geometry,geometry2, material;
 
         this.scene = new THREE.Scene();
 
-        this.camera = new THREE.PerspectiveCamera(50, this.container.clientWidth / this.container.clientHeight, 1, 100000);
-        this.camera.position.z = 500;
+        this.camera = new THREE.PerspectiveCamera(50, this.container.clientWidth / this.container.clientHeight, 1, 100);
+        this.camera.position.z =40;
         this.camera.position.x = 0;
         this.camera.position.y = 0;
+
+        this.camera.lookAt(new THREE.Vector3(0,0,0));
+
         this.scene.add(this.camera);
 
-        geometry = new THREE.CylinderGeometry(20,20, 200, 100,100);
-        geometry2 = new THREE.CylinderGeometry(20,20, 100, 100,100);
-        material = new THREE.MeshNormalMaterial();
-
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh2 = new THREE.Mesh(geometry2,  new THREE.MeshNormalMaterial());
-        this.mesh2.position.y = -50;
-        this.scene.add(this.mesh);
-        this.scene.add(this.mesh2);
+        var loader = new THREE.JSONLoader();
 
 
-        this.renderer = new THREE.WebGLRenderer();
+        this.renderer = new THREE.WebGLRenderer({
+            clearAlpha: 1,
+            clearColor: 0xdddddd,
+            antialias: true
+        });
+        this.renderer.shadowMapEnabled = true;
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
 
-        this.container.appendChild(this.renderer.domElement);
+        loader.load('model/hold.json', this.addGeometry.bind(this));
 
-        this.animate();
+        var controls = new THREE.OrbitControls(this.camera, this.renderer.domElement );
+        controls.addEventListener( 'change', this.render.bind(this));
+
+
     }
 
-    animate() {
+    addGeometry(geometry, materials) {
+        this.meshes = [];
 
-        //requestAnimationFrame(this.animate.bind(this));
+
+        for (var i =0; i < this.size; i++) {
+            this.meshes.push([]);
+            for (var j =0; j < this.size; j++) {
+                var color = (i +j === this.size - 1 ? 0x06009e : 0xdfdfdf);
+                var material = new THREE.MeshPhongMaterial( { color: color});
+                var mesh = new THREE.Mesh(geometry, material);
+                mesh.receiveShadow = true;
+
+                mesh.scale.x = mesh.scale.y = mesh.scale.z = 0.85;
+                mesh.position.x = i*7.5-11;
+                mesh.position.y = -j*7.5 +11;
+                mesh.rotateX(Math.PI/2);
+                mesh.rotateY(Math.PI/4);
+
+                this.meshes[i].push(mesh);
+                this.scene.add(mesh);
+            }
+        }
+
+        var plane = new THREE.Mesh(new THREE.CubeGeometry(100,100,1), new THREE.MeshPhongMaterial({color: 0x00ff00}));
+        plane.receiveShadow = true;
+        plane.position.z = -2;
+        this.scene.add(plane);
+
+        //var spot = new THREE.SpotLight(0xffffff,1);
+        //spot.position.set(0,0,15);
+        //spot.shadowCameraNear = 1; // keep near and far planes as tight as possible
+        //spot.shadowCameraFar = 10; // shadows not cast past the far plane
+        //spot.castShadow = true;
+        //
+        //this.scene.add(spot);
+
+        var light = new THREE.SpotLight();
+        light.position.set(20,-10,40);
+        light.target.position.set(0,0,1);
+        light.castShadow = true;
+
+        light.shadowCameraNear = 1; // keep near and far planes as tight as possible
+        light.shadowCameraFar = 10; // shadows not cast past the far plane
+
+        this.scene.add(light);
+
         this.render();
+        this.container.appendChild(this.renderer.domElement);
+
+        this.renderer.domElement.addEventListener("click", this.onclick.bind(this));
+
 
     }
 
     render() {
+        this.renderer.render(this.scene, this.camera);
+    }
 
-        this.mesh.rotation.x -= Math.PI/3;
-        this.mesh.rotation.y -= Math.PI/6;//Math.PI/3;
-        this.mesh.rotation.z -= Math.PI/6;//Math.PI/3;
+    stop() {
+        this.renderer.domElement.removeEventListener("click", this.onclick.bind(this));
+    }
 
-    this.renderer.render(this.scene, this.camera);
+    onclick(e: MouseEvent) {
+
+
+        if (!this.rotation) {
+            this.rotation = true;
+
+            var x = e.x - this.renderer.domElement.getBoundingClientRect().left - this.pad;
+            var y = e.y - this.renderer.domElement.getBoundingClientRect().top - this.pad;
+
+            var j = Math.floor(x / this.cellSize);
+            var i = Math.floor(y / this.cellSize);
+
+            this.i = Math.min(i, this.size - 1);
+            this.j = Math.min(j, this.size - 1);
+            this.p = 1;
+
+            requestAnimationFrame(this.rotate.bind(this));
+        }
+    }
+
+    rotate() {
+
+
+        for (var k = 0; k < this.size; k++) {
+            var line = this.meshes[k];
+            for (var t = 0; t<line.length; t++) {
+                if (k === this.i || t === this.j) {
+                    this.meshes[t][k].rotateY((1-this.p)*Math.PI/4);
+                }
+            }
+        }
+
+        this.render();
+        this.p = this.p-0.02;
+
+        if (this.p >= 0) {
+            requestAnimationFrame(this.rotate.bind(this));
+        } else {
+            this.rotation = false;
+        }
     }
 }
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    var game: Game  = new SnakeGame(<HTMLElement>document.getElementsByClassName("container")[0]);
+    var game: Game  = new ThreeDimGame(<HTMLElement>document.getElementsByClassName("container")[0]);
     game.start();
 });
