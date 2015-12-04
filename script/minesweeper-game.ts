@@ -13,6 +13,7 @@ class NumberCell implements Cell {
             return;
         }
         context.beginPath();
+        context.fillStyle = "black";
         context.fillText(this.value.toString(), x + width / 2, y + height / 2, height);
         context.stroke();
         context.closePath();
