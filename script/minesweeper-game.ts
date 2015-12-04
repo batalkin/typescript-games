@@ -53,7 +53,7 @@ var fillWithColor = function(context:CanvasRenderingContext2D, fillStyle:String,
 }
 
 
-class MinesweeperGame extends Game {
+class MinesweeperGame extends PromiseProvider<GameResult> implements Game{
 
     canvas:HTMLCanvasElement;
     ctx:CanvasRenderingContext2D;
@@ -119,6 +119,8 @@ class MinesweeperGame extends Game {
 
         this.canvas.addEventListener("click", this.onLeftButtonClick.bind(this));
         this.canvas.addEventListener("contextmenu", this.onRightButtonClick.bind(this));
+
+        return this.promise();
     }
 
     stop() {

@@ -11,7 +11,7 @@
     "threejs/three-orbitcontrols.d.ts": {
       "commit": "715df764419937a75a25dcd76bfc954157bc7b96"
     },
-    "eventemitter2/eventemitter2.d.ts": {
+    "es6-promise/es6-promise.d.ts": {
       "commit": "e5a27ea95e47b95333784f1f0d590127b4e39a89"
     }
   }

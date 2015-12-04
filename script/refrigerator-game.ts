@@ -35,6 +35,8 @@ class RefrigeratorGame extends CanvasGame {
         this.renderLevel();
 
         this.canvas.addEventListener("click", this.onclick.bind(this));
+
+        return this.promise();
     }
 
     stop() {

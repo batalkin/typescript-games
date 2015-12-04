@@ -65,6 +65,8 @@ class SnakeGame extends CanvasGame {
         this.targetTimerToken = setInterval(this.blinkTarget.bind(this), 10);
 
         document.body.addEventListener("keydown", this.onkeypress.bind(this));
+
+        return this.promise();
     }
 
     blinkTarget() {

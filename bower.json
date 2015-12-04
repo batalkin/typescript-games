@@ -19,6 +19,6 @@
   ],
   "dependencies": {
     "threejs": "latest",
-    "eventemitter2": "~0.4.14"
+    "es6-promise": "~3.0.2"
   }
 }

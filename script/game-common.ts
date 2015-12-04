@@ -1,16 +1,28 @@
-///<reference path="../typings/eventemitter2/eventemitter2.d.ts"/>
+///<reference path="../typings/es6-promise/es6-promise.d.ts"/>
+interface Game{
+    start():Promise<GameResult>;
+}
 
-class Game extends EventEmitter2{
-    start() {
-        this.win();
+enum GameResult {
+    WIN,
+    LOOSE
+}
+
+class PromiseProvider<T> {
+    resolveCallback:(T) => void;
+
+    promise():Promise<T> {
+        return new Promise(function(resolve) {
+            this.resolveCallback = resolve;
+        }.bind(this))
     }
 
-    win() {
-        this.emit("win")
+    resolveWith(value:T) {
+        this.resolveCallback(value);
     }
 }
 
-class CanvasGame extends Game {
+class CanvasGame extends PromiseProvider<GameResult> implements Game{
     canvas:HTMLCanvasElement;
 
     constructor(public container:HTMLElement) {
@@ -22,6 +34,8 @@ class CanvasGame extends Game {
         this.canvas.height = this.container.clientHeight;
         this.canvas.width = this.container.clientWidth;
         this.container.appendChild(this.canvas);
+
+        return this.promise();
     }
 
 }

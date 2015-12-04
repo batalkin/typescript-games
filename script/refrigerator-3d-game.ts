@@ -15,7 +15,7 @@ interface Refrigerator3dGameParameters {
 }
 
 
-class Refrigerator3dGame extends Game {
+class Refrigerator3dGame extends PromiseProvider<GameResult> implements Game {
 
     renderer:THREE.WebGLRenderer;
     scene:THREE.Scene;
@@ -36,6 +36,7 @@ class Refrigerator3dGame extends Game {
 
     public start() {
         new THREE.JSONLoader().load('model/hold.json', this.addGeometry.bind(this));
+        return this.promise();
     }
 
     addGeometry(geometry) {
@@ -159,7 +160,7 @@ class Refrigerator3dGame extends Game {
             }.bind(this), 1000 / 60);
         } else {
             if (this.isWin()) {
-                this.win();
+                this.resolveWith(GameResult.WIN);
             }
         }
     }

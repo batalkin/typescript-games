@@ -12,20 +12,37 @@ document.addEventListener('DOMContentLoaded', function () {
     var games:Game[] = [
         new SokobanGame(container),
         new SnakeGame(container),
-        //new RefrigeratorGame(container),
+        new RefrigeratorGame(container),
         new Refrigerator3dGame(container, {level: 5, rotationSpeed: 0.5}),
         new MinesweeperGame(container)
     ];
 
+    var clearContainer = function() {
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+    };
 
-    var index = Math.round(Math.random()*(games.length-1));
-    var game = games[index];
-    game.removeAllListeners("win");
-    game.on("win", function() {
-        console.log("One should add some logic here!");
-    });
-    game.start();
+    var startNextRandomGame = function() {
+        var index = Math.round(Math.random()*(games.length-1));
+        var game = games[index];
 
+        game.start()
+            .then(clearContainer)
+            .then(startNextRandomGame)
+            .catch(console.log.bind(console));
 
+        /* TODO game clean up. Smth like game.stop in callback
+            Or add clean up logic into games
 
+            Score thing:
+
+            game.start()
+                .then(addScoresToTotal)
+                .then(game.close.bind(game))
+                .then(..)
+         */
+    };
+
+    startNextRandomGame();
 });

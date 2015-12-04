@@ -51,6 +51,8 @@ class SokobanGame extends CanvasGame {
         this.renderLevel();
 
         document.body.addEventListener("keydown", this.onkeypress.bind(this));
+
+        return this.promise();
     }
 
     stop() {
