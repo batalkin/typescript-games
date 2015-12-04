@@ -15,7 +15,7 @@ interface Refrigerator3dGameParameters {
 }
 
 
-class Refrigerator3dGame implements Game {
+class Refrigerator3dGame extends Game {
 
     renderer:THREE.WebGLRenderer;
     scene:THREE.Scene;
@@ -27,6 +27,7 @@ class Refrigerator3dGame implements Game {
     level:number = 3;
 
     constructor(public container:HTMLElement, parameters?:Refrigerator3dGameParameters) {
+        super();
         if (parameters) {
             this.level = parameters.level || this.level;
             this.rotationSpeed = parameters.rotationSpeed || this.rotationSpeed;
@@ -167,10 +168,6 @@ class Refrigerator3dGame implements Game {
         return !this.cubes.some(function(cube) {
             return Math.round(Math.tan(cube.rotation.y)) != 1
         });
-    }
-
-    win() {
-        alert("You have done it!!!")
     }
 
     stop() {

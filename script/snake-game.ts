@@ -1,40 +1,22 @@
 /// <reference path="game-common.ts"/>
 
-class Point {
-    x:number = 0;
-    y:number = 0;
-
-    constructor(x:number, y:number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public equals(p:Point) {
-        return this.x == p.x && this.y == p.y;
-    }
-
-    public move(dx:number, dy:number):Point {
-        return new Point(this.x + dx, this.y + dy);
-    }
-
-    static randomPoint(maxX:number, maxY:number):Point {
-        var x = Math.round(Math.random() * (maxX - 1));
-        var y = Math.round(Math.random() * (maxY - 1));
-        return new Point(x, y);
-    }
-}
-
 class SnakeGame extends CanvasGame {
 
     ctx:CanvasRenderingContext2D;
     stone:Point[];
     body:Point[];
     size:number = 20;
+    score:number = 0;
     initialBodyLength = 4;
     timerToken:number;
+    targetTimerToken:number;
     dx:number;
     dy:number;
+    targetDx:number = 0;
+    targetDy:number = 0;
+
     target:Point = undefined;
+    targetDouble:Point = undefined;
 
     isEmpty(p:Point):Boolean {
         if (p.x < 0 || p.y < 0 || p.x >= this.size || p.y >= this.size) {
@@ -51,7 +33,6 @@ class SnakeGame extends CanvasGame {
         if (this.target && this.target.equals(p)) {
             return false;
         }
-
         return true;
     }
 
@@ -64,25 +45,47 @@ class SnakeGame extends CanvasGame {
             this.body.push(new Point(this.size / 2, this.size - i - 1));
         }
 
-
         this.stone = new Array(0);
         for (var i = 0; i < 10; i++) {
             this.stone.push(this.findFreeRandomCell());
         }
 
-        this.target = this.findFreeRandomCell();
+        this.targetDouble = this.findFreeRandomCell();
 
         this.renderLevel();
         this.dx = -10;
         this.dy = -10;
+        this.targetDx = 0.5;
+        this.targetDy = 0.2;
+
+        this.score = 0;
+        this.printScore();
+
         this.timerToken = setInterval(this.doStep.bind(this), 100);
+        this.targetTimerToken = setInterval(this.blinkTarget.bind(this), 10);
 
         document.body.addEventListener("keydown", this.onkeypress.bind(this));
+    }
+
+    blinkTarget() {
+        if(this.target) {
+            var targetColor = "black";
+            if(Math.random() > 0.7) {
+                var targetColor = "#EEE";
+            }
+            this.fillPixel(this.target, this.ctx, targetColor);
+        }
+        var headColor = "black";
+        if(Math.random() > 0.9) {
+            var headColor = "#EEE";
+        }
+        this.fillPixel(this.body[this.body.length - 1], this.ctx, headColor);
     }
 
     stop() {
         document.body.removeEventListener("keydown", this.onkeypress.bind(this));
         clearInterval(this.timerToken);
+        clearInterval(this.targetTimerToken);
         this.container.removeChild(this.canvas);
     }
 
@@ -96,10 +99,11 @@ class SnakeGame extends CanvasGame {
         if (!this.isEmpty(newHead)) {
             if (this.target && this.target.equals(newHead)) {
                 this.target = this.findFreeRandomCell();
-                console.log("Target hit");
+                this.score++;
+                this.printScore();
             } else {
-                this.stop();
                 alert("Gave over");
+                this.stop();
                 this.start();
                 return;
             }
@@ -107,7 +111,17 @@ class SnakeGame extends CanvasGame {
             this.body.shift();
         }
         this.body.push(newHead);
+
+        this.targetDouble = this.targetDouble.move(this.targetDx, this.targetDy);
+        this.targetDouble.x = this.targetDouble.x > this.size?0:this.targetDouble.x;
+        this.targetDouble.y = this.targetDouble.y > this.size?0:this.targetDouble.y;
+        this.targetDouble = this.targetDouble.move(0.5, 0.5);
+        this.target = new Point( parseInt(this.targetDouble.x + "", 10), parseInt(this.targetDouble.y + "", 10));
         this.renderLevel();
+    }
+
+    printScore() {
+        document.getElementById("score").innerText = "" + this.score;
     }
 
     findFreeRandomCell():Point {
@@ -136,12 +150,15 @@ class SnakeGame extends CanvasGame {
     }
 
     checkAndSetDirection(dx:number, dy:number) {
-        if (this.dx == 0 && dx == 0 || this.dy == 0 && dy == 0) {
-            return; // Cant change direction to reverse
+
+        var head:Point = this.body[this.body.length - 1];
+        var second:Point = this.body[this.body.length - 2];
+
+        if (second.x - head.x == dx && second.y - head.y == dy) {
+            return; // Cant change direction to second point
         }
         this.dx = dx;
         this.dy = dy;
-
     }
 
     private renderLevel() {
@@ -149,28 +166,37 @@ class SnakeGame extends CanvasGame {
 
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        ctx.fillStyle = "green";
-        for (var k = 0; k < this.stone.length; k++) {
-            this.fillPixel(this.stone[k], ctx);
+        for(var x = 0;x < this.size; x++) {
+            for(var y = 0;y < this.size; y++) {
+                this.fillPixel(new Point(x, y), ctx, "#EEE");
+            }
         }
 
-        ctx.fillStyle = "red";
-        for (var k = 0; k < this.body.length; k++) {
-            this.fillPixel(this.body[k], ctx);
+        for (var k = 0; k < this.stone.length; k++) {
+            this.fillPixel(this.stone[k], ctx, "black");
         }
-        ctx.fillStyle = "gray";
-        this.fillPixel(this.body[this.body.length - 1], ctx);
+
+        for (var k = 0; k < this.body.length; k++) {
+            this.fillPixel(this.body[k], ctx, "black");
+        }
 
         if (this.target) {
-            ctx.fillStyle = "yellow";
-            this.fillPixel(this.target, ctx);
+            this.fillPixel(this.target, ctx, "black");
         }
 
     }
 
-    fillPixel(point:Point, ctx:CanvasRenderingContext2D) {
+    fillPixel(point:Point, ctx:CanvasRenderingContext2D, color) {
         var d:number = this.canvas.width / this.size;
-        ctx.fillRect(point.x * this.canvas.width / this.size, point.y * this.canvas.height / this.size, this.canvas.width / this.size, this.canvas.height / this.size);
+        var p:number = 1;
+        ctx.fillStyle = color;
+        ctx.fillRect(point.x * this.canvas.width / this.size + p, point.y * this.canvas.height / this.size + p, this.canvas.width / this.size - 2*p, this.canvas.height / this.size - 2*p);
+        ctx.fillStyle = "white";
+        p = 3;
+        ctx.fillRect(point.x * this.canvas.width / this.size + p, point.y * this.canvas.height / this.size + p, this.canvas.width / this.size - 2*p, this.canvas.height / this.size - 2*p);
+        ctx.fillStyle = color;
+        p = 5;
+        ctx.fillRect(point.x * this.canvas.width / this.size + p, point.y * this.canvas.height / this.size + p, this.canvas.width / this.size - 2*p, this.canvas.height / this.size - 2*p);
     }
 
 }

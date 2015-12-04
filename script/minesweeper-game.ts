@@ -52,13 +52,8 @@ var fillWithColor = function(context:CanvasRenderingContext2D, fillStyle:String,
     context.closePath();
 }
 
-class Point {
-    x:number;
-    y:number;
-}
 
-
-class MinesweeperGame implements Game {
+class MinesweeperGame extends Game {
 
     canvas:HTMLCanvasElement;
     ctx:CanvasRenderingContext2D;
@@ -74,6 +69,7 @@ class MinesweeperGame implements Game {
     gameIsOver:boolean;
 
     constructor(public container:HTMLElement) {
+        super();
     }
 
 

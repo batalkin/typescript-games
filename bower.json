@@ -18,6 +18,7 @@
     "tests"
   ],
   "dependencies": {
-    "threejs": "latest"
+    "threejs": "latest",
+    "eventemitter2": "~0.4.14"
   }
 }

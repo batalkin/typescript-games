@@ -1,29 +1,4 @@
 /// <reference path="game-common.ts"/>
-
-class Point {
-    x:number = 0;
-    y:number = 0;
-
-    constructor(x:number, y:number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    public equals(p:Point) {
-        return this.x == p.x && this.y == p.y;
-    }
-
-    public move(dx:number, dy:number):Point {
-        return new Point(this.x + dx, this.y + dy);
-    }
-
-    static randomPoint(maxX:number, maxY:number):Point {
-        var x = Math.round(Math.random() * (maxX - 1));
-        var y = Math.round(Math.random() * (maxY - 1));
-        return new Point(x, y);
-    }
-}
-
 class Man extends Point {}
 
 class SokobanGame extends CanvasGame {

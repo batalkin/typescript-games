@@ -17,6 +17,15 @@ document.addEventListener('DOMContentLoaded', function () {
         new MinesweeperGame(container)
     ];
 
+
     var index = Math.round(Math.random()*(games.length-1));
-    games[index].start();
+    var game = games[index];
+    game.removeAllListeners("win");
+    game.on("win", function() {
+        console.log("One should add some logic here!");
+    });
+    game.start();
+
+
+
 });
