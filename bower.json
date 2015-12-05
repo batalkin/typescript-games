@@ -2,7 +2,9 @@
   "name": "typescript-games",
   "homepage": "https://github.com/batalkin/typescript-games",
   "authors": [
-    "Kirill Batalkin <batalkin@gmail.com>"
+    "Kirill Batalkin <batalkin@gmail.com>",
+    "Alexey Fomin <fomin.alexey@gmail.com>",
+    "Alexander Rudenko"
   ],
   "description": "",
   "main": "index.html",
